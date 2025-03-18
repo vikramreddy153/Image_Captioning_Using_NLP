@@ -1,4 +1,4 @@
-import streamlit as stgit push -u origin main
+import streamlit as st
 import numpy as np
 import pickle
 import tensorflow as tf
@@ -17,14 +17,25 @@ model = tf.keras.models.load_model('mymodel.h5')
 # Load the tokenizer
 with open('tokenizer.pkl', 'rb') as tokenizer_file:
     tokenizer = pickle.load(tokenizer_file)
-    
+
 # Set custom web page title
 st.set_page_config(page_title="Caption Generator App", page_icon="📷")
 
+
+# Inject custom CSS
+def load_css():
+    with open("style.css", "r") as f:
+        css = f.read()
+    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+
+
+# Load external CSS
+load_css()
+
 # Streamlit app
-st.title("Image Caption Generator")
+st.title("📸 Image Caption Generator")
 st.markdown(
-    "Upload an image, and this app will generate a caption for it using a trained LSTM model."
+    "Upload an image, and this app will generate a caption for it."
 )
 
 # Upload image
@@ -44,17 +55,19 @@ if uploaded_image is not None:
         image = image.reshape((1, image.shape[0], image.shape[1], image.shape[2]))
         image = preprocess_input(image)
 
-        # Extract features using VGG16
+        # Extract features using MobileNetV2
         image_features = mobilenet_model.predict(image, verbose=0)
 
         # Max caption length
         max_caption_length = 34
-        
+
+
         # Define function to get word from index
         def get_word_from_index(index, tokenizer):
             return next(
                 (word for word, idx in tokenizer.word_index.items() if idx == index), None
-        )
+            )
+
 
         # Generate caption using the model
         def predict_caption(model, image_features, tokenizer, max_caption_length):
@@ -70,6 +83,7 @@ if uploaded_image is not None:
                     break
             return caption
 
+
         # Generate caption
         generated_caption = predict_caption(model, image_features, tokenizer, max_caption_length)
 
@@ -78,8 +92,10 @@ if uploaded_image is not None:
 
     # Display the generated caption with custom styling
     st.markdown(
-        f'<div style="border-left: 6px solid #ccc; padding: 5px 20px; margin-top: 20px;">'
-        f'<p style="font-style: italic;">“{generated_caption}”</p>'
-        f'</div>',
+        f"""
+        <div class="caption-container">
+            <p class="caption-text">“{generated_caption}”</p>
+        </div>
+        """,
         unsafe_allow_html=True
     )
