@@ -93,6 +93,10 @@ enableCORS = false
 |   README.md
 |   requirements.txt
 |   tokenizer.pkl
+|   style.css
+|   setup_env.bat
+\---flickr8k
+        \---images
 \---resource
         demo.gif
 ```
